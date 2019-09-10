@@ -1,13 +1,13 @@
 import React from 'react';
 
-const Table = ( { data, rows } ) => {
+const Table = ( { unknown, rows } ) => {
     return (
         <div className="tableContainer">
             <table>
                 <thead>
                 <tr>
                     {
-                        Object.keys( data ).map( i => <th key={i}>{"Variable" + i}</th> )
+                        unknown.map( (item, index) => <th key={index}>{capitalizeFirstLetter(item)}</th> )
                     }
                     <td>Result</td>
                 </tr>
@@ -29,5 +29,9 @@ const Table = ( { data, rows } ) => {
         </div>
     )
 };
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 export default Table;

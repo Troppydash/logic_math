@@ -5,7 +5,7 @@ const Input = ({handleSubmit}) => (
     <div className="input-container">
         <Formik
             // input values
-            initialValues={{ amount: 0, equation: '' }}
+            initialValues={{ equation: '' }}
             // Submit Functions
             onSubmit={(values, { setSubmitting }) => {
                 handleSubmit(values);
@@ -14,11 +14,7 @@ const Input = ({handleSubmit}) => (
             {({ isSubmitting }) => (
                 <Form>
                     <div>
-                        <h5>Number of Variables:</h5>
-                        <Field type="amount" name="amount" placeholder=""/>
-                    </div>
-                    <div>
-                        <h5>Equation:</h5>
+                        <h3>Equation:</h3>
                         <Field type="equation" name="equation" placeholder="Add an Equation here..."/>
                     </div>
                     <div>

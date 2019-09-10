@@ -3,15 +3,29 @@ import Input from "./components/Input";
 import Table from "./components/Table";
 import './App.css';
 
-class App extends React.Component {
-    state = {
-        shouldDisplay: false
-    };
+const initialState = {
+    shouldDisplay: false,
+    error: false,
+    equation: undefined,
+    unknown: undefined,
+    rows: undefined
+};
 
-    handleSubmit = ( { amount, equation } ) => {
+class App extends React.Component {
+    state = initialState;
+
+    handleSubmit = ( { equation } ) => {
+        // REGEX for unknown
+        const re = /\b(?!(and|or|not)\b)\w+/gi;
+        const unknown = [...new Set(equation.match(re))];
+
+        const amount = unknown.length;
+
         // Get Hide Table
         this.setState( {
-            shouldDisplay: false
+            shouldDisplay: false,
+            equation,
+            unknown
         }, () => {
 
             // Cal T and F Values
@@ -50,30 +64,46 @@ class App extends React.Component {
 
                 // Replace Variables
                 let coped = equation.repeat( 1 );
+
                 for ( let i = 1; i <= amount; i++ ) {
-                    const str = 'v' + i;
-                    coped = coped.replaceAll( str, arr[i - 1] );
+                    const str = unknown[i-1];
+                    coped = coped.replaceAll( str, arr[i - 1]);
                 }
 
                 // Replace Operators
-                coped = coped.replaceAll( 'and', '&&' );
-                coped = coped.replaceAll( 'or', '||' );
-                coped = coped.replaceAll( 'not', '!' );
+                coped = coped.replaceAll( 'AND', '&&' );
+                coped = coped.replaceAll( 'OR', '||' );
+                coped = coped.replaceAll( 'NOT', '!' );
 
                 // Get result
                 // eslint-disable-next-line
-                const final = eval( coped );
-                arr.push( final );
+                let final;
+                try {
+                    // eslint-disable-next-line
+                    final = eval( coped );
+                    arr.push( final );
+
+
+                    // Allow Display
+                    this.setState( {
+                        rows,
+                        shouldDisplay: true,
+                        error: false
+                    } )
+
+                } catch (e) {
+                    this.reset();
+                    this.setState({
+                        error: true
+                    });
+                    return 0;
+                }
             } );
-
-            // Allow Display
-            this.setState( {
-                rows,
-                data,
-                shouldDisplay: true
-            } )
-
         } );
+    };
+
+    reset = () => {
+        this.setState(initialState);
     };
 
     render() {
@@ -81,21 +111,30 @@ class App extends React.Component {
             <div className="flex-container">
                 <div className="content">
                     <Input handleSubmit={this.handleSubmit}/>
+                    <h2>{this.state.equation}</h2>
+                    {
+                        this.state.error ? (
+                            <h3>Please check the format of your equation.</h3>
+                        ) : ""
+                    }
                     {
                         this.state.shouldDisplay ? (
-                            <Table data={this.state.data} rows={this.state.rows}/>
+                            <Table unknown={this.state.unknown} rows={this.state.rows}/>
                         ) : ""
                     }
                 </div>
                 <div className="help-container">
                     <h1>Help</h1>
-                    <p>Input the Amount of Unknown Variables on the top.</p>
-                    <p>Input the equation of the bottom.</p>
-                    <p>Where v1 is the first variable, v2 second.</p>
+                    <p>Input the equation in the input</p>
+                    <p>Operators:</p>
+                    <p>And, Or, Not (case-insensitive)</p>
 
-                    <h3>Example</h3>
-                    <p>Top: 2</p>
-                    <p>Bottom: v1 and v2</p>
+                    <h3>Example to try out</h3>
+                    <code>variable1 and variable2</code>
+                    <br />
+                    <code>(variable1 or variable2) and not variable2</code>
+                    <br />
+                    <code>(not variable3 and variable2) and not(variable2 or not variable1)</code>
                 </div>
             </div>
         );
@@ -106,7 +145,8 @@ class App extends React.Component {
 // eslint-disable-next-line
 String.prototype.replaceAll = function ( search, replacement ) {
     var target = this;
-    return target.replace( new RegExp( search, 'g' ), replacement );
+    const reg = new RegExp( '\\b' + search + '\\b', 'gi');
+    return target.replace( reg, replacement );
 };
 
 export default App;
