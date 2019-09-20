@@ -16,7 +16,7 @@ class App extends React.Component {
 
     handleSubmit = ( { equation } ) => {
         // REGEX for unknown
-        const re = /\b(?!(and|or|not)\b)\w+/gi;
+        const re = /\b(?!(and|or|not|xor)\b)\w+/gi;
         const unknown = [...new Set(equation.match(re))];
 
         const amount = unknown.length;
@@ -74,6 +74,7 @@ class App extends React.Component {
                 coped = coped.replaceAll( 'AND', '&&' );
                 coped = coped.replaceAll( 'OR', '||' );
                 coped = coped.replaceAll( 'NOT', '!' );
+                coped = coped.replaceAll('XOR', '!=')
 
                 // Get result
                 // eslint-disable-next-line
